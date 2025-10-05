@@ -18,7 +18,7 @@ import { getTypeColor } from "../utils/typeColors";
 export default function FilterView() {
   const [filters, setFilters] = useState({
     Type: "",
-    Ability: "",
+    Abilities: [], // Changed from Ability to Abilities array
     HpRange: [0, 255],
     AttackRange: [0, 255],
     DefenseRange: [0, 255],
@@ -65,7 +65,6 @@ export default function FilterView() {
       // Convert ranges back to individual Min/Max values for API
       const apiFilters = {
         Type: filters.Type,
-        Ability: filters.Ability,
         MinHp: filters.HpRange[0],
         MaxHp: filters.HpRange[1],
         MinAttack: filters.AttackRange[0],
@@ -82,7 +81,7 @@ export default function FilterView() {
         MaxTotal: filters.TotalRange[1],
       };
 
-      const filtered = await filterPokemon(apiFilters);
+      const filtered = await filterPokemon(apiFilters, filters.Abilities);
       setResults(filtered);
 
       if (filtered.length === 0) {
@@ -99,7 +98,7 @@ export default function FilterView() {
   const handleReset = () => {
     setFilters({
       Type: "",
-      Ability: "",
+      Abilities: [], // Reset to empty array
       HpRange: [0, 255],
       AttackRange: [0, 255],
       DefenseRange: [0, 255],
@@ -156,22 +155,52 @@ export default function FilterView() {
 
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Ability
+                  Abilities (Select multiple)
                 </label>
                 <select
-                  value={filters.Ability}
-                  onChange={(e) =>
-                    handleFilterChange("Ability", e.target.value)
-                  }
-                  className="w-full px-3 py-2 bg-slate-900 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  multiple
+                  value={filters.Abilities}
+                  onChange={(e) => {
+                    const selected = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    handleFilterChange("Abilities", selected);
+                  }}
+                  className="w-full px-3 py-2 bg-slate-900 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 min-h-[120px]"
                 >
-                  <option value="">All Abilities</option>
                   {abilities.map((ability) => (
                     <option key={ability} value={ability}>
                       {ability}
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-400 mt-1">
+                  Hold Ctrl (Windows) or Cmd (Mac) to select multiple abilities
+                </p>
+                {filters.Abilities.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {filters.Abilities.map((ability) => (
+                      <span
+                        key={ability}
+                        className="px-3 py-1 bg-purple-600/30 border border-purple-500/50 rounded-full text-sm text-purple-200 flex items-center gap-2"
+                      >
+                        {ability}
+                        <button
+                          onClick={() => {
+                            handleFilterChange(
+                              "Abilities",
+                              filters.Abilities.filter((a) => a !== ability)
+                            );
+                          }}
+                          className="hover:text-white text-lg leading-none"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

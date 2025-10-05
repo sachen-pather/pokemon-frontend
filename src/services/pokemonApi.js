@@ -1,6 +1,5 @@
 const BASE_URL =
   "https://pokemonapi20251004230808-cjencdcubyf9h3df.canadacentral-01.azurewebsites.net/api/Pokemon";
-
 // Helper function to handle API errors
 async function handleResponse(response) {
   if (!response.ok) {
@@ -71,7 +70,7 @@ export async function comparePokemon(pokemon1, pokemon2) {
 }
 
 // Filter Pokémon with multiple criteria
-export async function filterPokemon(filters) {
+export async function filterPokemon(filters, abilities = []) {
   const params = new URLSearchParams();
 
   // Add each filter parameter if it has a value
@@ -82,6 +81,13 @@ export async function filterPokemon(filters) {
       filters[key] !== ""
     ) {
       params.append(key, filters[key]);
+    }
+  });
+
+  // Add each ability as a separate parameter
+  abilities.forEach((ability) => {
+    if (ability) {
+      params.append("Abilities", ability);
     }
   });
 
